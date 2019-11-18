@@ -680,9 +680,8 @@ int getCost(int cardNumber)
 
     return -1;
 }
-
-
-int baronCardEffect()(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
+// choice1= discard if 1, not if 0.  
+int baronCardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
     int i;
     int j;
@@ -724,13 +723,20 @@ int baronCardEffect()(int card, int choice1, int choice2, int choice3, struct ga
                     printf("Must gain an estate if there are any\n");
                 }
                 if (supplyCount(estate, state) > 0) {
-                    //gainCard(estate, state, 0, currentPlayer);
-                    baronCardEffect(card, choice1, choice2, choice3, state, handPos, bonus); // BUG #2
+                    // WHAT IT DID ORIGINALLY:
+										//gainCard(estate, state, 0, currentPlayer);
+                    
+										// WHAT I CHANGED IT TO for BUG #2:
+										//baronCardEffect(card, choice1, choice2, choice3, state, handPos, bonus); 
+
 
                     state->supplyCount[estate]--;//Decrement estates
                     if (supplyCount(estate, state) == 0) {
                         isGameOver(state);
                     }
+										// This would be an endless loop, so I am changing it to print an error and exit instead.
+										printf("ENDLESS LOOP\n");
+										return -2;
                 }
                 card_not_discarded = 0;//Exit the loop
             }
@@ -754,16 +760,18 @@ int baronCardEffect()(int card, int choice1, int choice2, int choice3, struct ga
     return 0;
 }
 
-
-int MinionCardEffect()(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
+int minionCardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
     int i;
     int j;
     int k;
     int x;
     int index;
-    //int currentPlayer = whoseTurn(state);
-    int currentPlayer; // BUG #4
+		// original:
+    int currentPlayer = whoseTurn(state);
+		// my bug #4:
+    // int currentPlayer; // BUG #4
+		// but that crashes the program so...
     int nextPlayer = currentPlayer + 1;
 
     int temphand[MAX_HAND];// moved above the if statement
@@ -824,8 +832,7 @@ int MinionCardEffect()(int card, int choice1, int choice2, int choice3, struct g
     return 0;
 }
 
-
-int AmbassadorCardEffect()(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
+int ambassadorCardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
     int i;
     int j;
@@ -853,7 +860,7 @@ int AmbassadorCardEffect()(int card, int choice1, int choice2, int choice3, stru
     if (choice1 == handPos)
     {
        // return -1;
-       continue; // BUG #5 
+       // BUG #5 
     }
 
     for (i = 0; i < state->handCount[currentPlayer]; i++)
@@ -903,8 +910,7 @@ int AmbassadorCardEffect()(int card, int choice1, int choice2, int choice3, stru
     return 0;
 }
 
-
-int TributeCardEffect()(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
+int tributeCardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
     int i;
     int j;
@@ -985,8 +991,7 @@ int TributeCardEffect()(int card, int choice1, int choice2, int choice3, struct 
     return 0;
 }
 
-
-int MineCardEffect()(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
+int mineCardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
     int i;
     int j;
@@ -1040,7 +1045,6 @@ int MineCardEffect()(int card, int choice1, int choice2, int choice3, struct gam
     return 0;
 
 }
-
 
 int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
@@ -1217,7 +1221,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 
     case baron:
         // this card was refactored into its own code for Assignment 2
-        baronCardEffect(card, choice1, choice2, choice3, state, handPos, bonus)
+			  baronCardEffect(card, choice1, choice2, choice3, state, handPos, bonus);
         return 0;
 
     case great_hall:
@@ -1233,7 +1237,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 
     case minion:
         // this card was refactored into its own code for Assignment 2
-        minionCardEffect(card, choice1, choice2, choice3, state, handPos, bonus)
+				minionCardEffect(card, choice1, choice2, choice3, state, handPos, bonus);
         return 0;
 
     case steward:
@@ -1261,19 +1265,15 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 
     case tribute:
         // this card was refactored into its own code for Assignment 2
-        tributeCardEffect(card, choice1, choice2, choice3, state, handPos, bonus)
+			tributeCardEffect(card, choice1, choice2, choice3, state, handPos, bonus);
         return 0;
 
     case ambassador:
         // this card was refactored into its own code for Assignment 2
-        ambassadorCardEffect(card, choice1, choice2, choice3, state, handPos, bonus)
+			ambassadorCardEffect(card, choice1, choice2, choice3, state, handPos, bonus);
         return 0;
 
     case cutpurse:
-        // this card was refactored into its own code for Assignment 2
-        cutpurseCardEffect(card, choice1, choice2, choice3, state, handPos, bonus)
-        return 0;
-
         updateCoins(currentPlayer, state, 2);
         for (i = 0; i < state->numPlayers; i++)
         {
